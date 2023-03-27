@@ -42,12 +42,12 @@ public class AuthController {
         return ResponseEntity.ok(authService.userLogin(loginRequest));
     }
 
-    @PostMapping("/refreshtoken")
-    public ResponseEntity<ResponseGlobal<Object>> refreshToken(@Valid @RequestBody RefreshTokenRequest refreshTokenRequest,
-                                                                BindingResult result) {
-        if (result.hasErrors()) {
-            return ResponseEntity.ok(validateService.getErrorValidate(result));
-        }
-        return ResponseEntity.ok(authService.refreshToken(refreshTokenRequest));
-    }
+//    @PostMapping("/refreshtoken")
+//    public ResponseEntity<ResponseGlobal<Object>> refreshToken(@Valid @RequestBody RefreshTokenRequest refreshTokenRequest,
+//                                                                BindingResult result) {
+//        if (result.hasErrors()) {
+//            return ResponseEntity.ok(validateService.getErrorValidate(result));
+//        }
+//        return ResponseEntity.ok(authService.refreshToken(refreshTokenRequest));
+//    }
 }

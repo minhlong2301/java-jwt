@@ -3,7 +3,6 @@ package vn.learning.jwt.model;
 import lombok.Data;
 
 import javax.persistence.*;
-import java.time.Instant;
 
 @Data
 @Entity

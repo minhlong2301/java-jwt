@@ -19,9 +19,7 @@ import vn.learning.jwt.domain.response.RefreshTokenResponse;
 import vn.learning.jwt.domain.response.ResponseGlobal;
 import vn.learning.jwt.jwt.JwtProvider;
 import vn.learning.jwt.model.RefreshToken;
-import vn.learning.jwt.model.Role;
 import vn.learning.jwt.model.User;
-import vn.learning.jwt.model.UserRole;
 import vn.learning.jwt.repositoryy.RefreshTokenRepository;
 import vn.learning.jwt.repositoryy.RoleRepository;
 import vn.learning.jwt.repositoryy.UserRepository;
@@ -51,7 +49,7 @@ public class AuthService {
 
     private final JwtProvider jwtProvider;
 
-    private final RefreshTokenService refreshTokenService;
+//    private final RefreshTokenService refreshTokenService;
 
     private final RefreshTokenRepository refreshTokenRepository;
 
@@ -84,13 +82,11 @@ public class AuthService {
     public ResponseGlobal<Object> userLogin(LoginRequest loginRequest) {
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getUserName(), loginRequest.getPassWord()));
         SecurityContextHolder.getContext().setAuthentication(authentication);
-        String token = jwtProvider.createJwtToken(authentication);
         UserDetailsImpl userDetailsImpl = (UserDetailsImpl) authentication.getPrincipal();
-        RefreshToken refreshToken = refreshTokenService.createRefreshToken(userDetailsImpl.getUuid());
+        String token = jwtProvider.createJwtToken(userDetailsImpl);
         LoginResponse loginResponse = new LoginResponse();
-        loginResponse.setRefreshToken(refreshToken.getToken());
         loginResponse.setAccessToken(token);
-        loginResponse.setName(userDetailsImpl.getTenDangNhap());
+        loginResponse.setName(userDetailsImpl.getUsername());
         return ResponseGlobal.builder()
                 .status(HttpStatus.OK.value())
                 .message("Thành công")
@@ -98,27 +94,27 @@ public class AuthService {
                 .build();
     }
 
-    public ResponseGlobal<Object> refreshToken(RefreshTokenRequest refreshTokenRequest) {
-        RefreshTokenResponse refreshTokenResponse = new RefreshTokenResponse();
-        Optional<RefreshToken> refreshToken = refreshTokenRepository.findByToken(refreshTokenRequest.getRefreshToken());
-        if (refreshToken.isPresent()) {
-            Optional<RefreshToken> refreshToken1 = Optional.of(refreshTokenRepository.findByToken(refreshTokenRequest.getRefreshToken()).get());
-            Optional<User> user = userRepository.findByUuid(refreshToken1.get().getUserId());
-            String token = jwtProvider.createJwtTokenFromUserName(user.get().getTenDangNhap());
-            refreshTokenResponse.setRefreshToken(refreshTokenRequest.getRefreshToken());
-            refreshTokenResponse.setAccessToken(token);
-            return ResponseGlobal.builder()
-                    .status(HttpStatus.OK.value())
-                    .message("Thành công")
-                    .data(refreshTokenResponse)
-                    .build();
-        } else {
-            return ResponseGlobal.builder()
-                    .status(HttpStatus.BAD_REQUEST.value())
-                    .message("RefreshToken không có trong DB")
-                    .data(null)
-                    .build();
-        }
-    }
+//    public ResponseGlobal<Object> refreshToken(RefreshTokenRequest refreshTokenRequest) {
+//        RefreshTokenResponse refreshTokenResponse = new RefreshTokenResponse();
+//        Optional<RefreshToken> refreshToken = refreshTokenRepository.findByToken(refreshTokenRequest.getRefreshToken());
+//        if (refreshToken.isPresent()) {
+//            Optional<RefreshToken> refreshToken1 = Optional.of(refreshTokenRepository.findByToken(refreshTokenRequest.getRefreshToken()).get());
+//            Optional<User> user = userRepository.findByUuid(refreshToken1.get().getUserId());
+//            String token = jwtProvider.createJwtTokenFromUserName(user.get().getTenDangNhap());
+//            refreshTokenResponse.setRefreshToken(refreshTokenRequest.getRefreshToken());
+//            refreshTokenResponse.setAccessToken(token);
+//            return ResponseGlobal.builder()
+//                    .status(HttpStatus.OK.value())
+//                    .message("Thành công")
+//                    .data(refreshTokenResponse)
+//                    .build();
+//        } else {
+//            return ResponseGlobal.builder()
+//                    .status(HttpStatus.BAD_REQUEST.value())
+//                    .message("RefreshToken không có trong DB")
+//                    .data(null)
+//                    .build();
+//        }
+//    }
 
 }

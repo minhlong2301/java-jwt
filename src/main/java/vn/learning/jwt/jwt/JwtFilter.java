@@ -1,6 +1,7 @@
 package vn.learning.jwt.jwt;
 
-
+import lombok.AllArgsConstructor;
+import lombok.Data;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,14 +19,9 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Objects;
 
-
 public class JwtFilter extends OncePerRequestFilter {
 
     private static final Logger logger = LoggerFactory.getLogger(JwtFilter.class);
-
-//    private final JwtProvider jwtProvider;
-//
-//    private final UserDetailsServiceImpl userDetailsServiceImpl;
 
     @Autowired
     JwtProvider jwtProvider;
@@ -37,17 +33,20 @@ public class JwtFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, FilterChain filterChain) throws ServletException, IOException {
         try {
             String token = getJwtTokenFromHeader(httpServletRequest);
+            System.out.println(token);
             if (jwtProvider.validateJwtToken(token)) {
                 String userName = jwtProvider.getUserNameFromJwtToken(token);
                 UserDetails userDetails = userDetailsServiceImpl.loadUserByUsername(userName);
-                UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(userDetails.getUsername(), null, null);
-                usernamePasswordAuthenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(httpServletRequest));
-                SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
+                if (Objects.nonNull(userDetails)) {
+                    UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                    usernamePasswordAuthenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(httpServletRequest));
+                    SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
+                }
             }
-            filterChain.doFilter(httpServletRequest, httpServletResponse);
         } catch (Exception e) {
             logger.error("Không thể set user authentication");
         }
+            filterChain.doFilter(httpServletRequest, httpServletResponse);
     }
 
     private String getJwtTokenFromHeader(HttpServletRequest httpServletRequest) {
